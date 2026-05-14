@@ -10,9 +10,8 @@
 #
 # What it does:
 #   - Creates docs/L0–L7 layer folders with -000-artifact-registry stubs
-#   - Installs bin/statutory-integrity.sh
-#   - Installs .github/workflows/governance.yml and ci.yml stubs
-#   - Installs .github/PULL_REQUEST_TEMPLATE.md
+#   - Installs governance scripts
+#   - Installs .github workflows, issue template, PR template, and branch-protection guidance
 #   - Installs CLAUDE.md, CHANGELOG.md templates
 #   - Skips any file that already exists (safe to re-run)
 
@@ -33,6 +32,7 @@ if [ -z "$PROJECT_NAME" ]; then
 fi
 
 DATE="$(date +%Y-%m-%d)"
+YEAR="$(date +%Y)"
 
 echo ""
 echo "╔══════════════════════════════════════════════════════════╗"
@@ -59,6 +59,7 @@ install_file() {
   sed \
     -e "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
     -e "s/{{DATE}}/$DATE/g" \
+    -e "s/{{YEAR}}/$YEAR/g" \
     "$SRC" > "$DEST"
   echo "  [write] $DEST"
 }
@@ -115,6 +116,17 @@ for i in "${!LAYERS[@]}"; do
   DESC="${LAYER_DESCRIPTIONS[$i]}"
   LAYER_NUM="${LAYER%%-*}"
   REGISTRY_PATH="$TARGET_DIR/docs/$LAYER/${LAYER_NUM}-000-artifact-registry-v1.md"
+  REGISTERED_ROWS="| (none yet) | — | — | — | First artifact will be added here |"
+  VERSION_SUMMARY="Registry created"
+
+  if [ "$LAYER" = "L0-foundation" ]; then
+    REGISTERED_ROWS="| L0-001-master-document-template-v1 | Master Document Template | Active | v1 | Canonical template for all layer artifacts |
+| L0-002-naming-convention-v1 | Naming Convention & Version Control | Active | v1 | Document ID format, filename rules, versioning standard |"
+    VERSION_SUMMARY="Registry created; L0-001 and L0-002 registered"
+  elif [ "$LAYER" = "L7-forensics" ]; then
+    REGISTERED_ROWS="| L7-000-master-registry-v1 | Forensics & Traceability Master Registry | Active | v1 | Cross-layer chain of custody for all remediation sessions |"
+    VERSION_SUMMARY="Registry created; L7-000-master-registry-v1 registered"
+  fi
 
   CONTENT="# ${LAYER_NUM}-000-artifact-registry-v1  $LAYER Artifact Registry
 
@@ -140,7 +152,7 @@ Registry of all artifacts in the $LAYER layer. Every \`.md\` file in this folder
 
 | Document ID | Title | Status | Version | Notes |
 |---|---|---|---|---|
-| (none yet) | — | — | — | First artifact will be added here |
+$REGISTERED_ROWS
 
 ---
 
@@ -148,7 +160,7 @@ Registry of all artifacts in the $LAYER layer. Every \`.md\` file in this folder
 
 | Version | Date | Author | Summary of changes |
 |---|---|---|---|
-| v1 | $DATE | $PROJECT_NAME | Registry created |
+| v1 | $DATE | $PROJECT_NAME | $VERSION_SUMMARY |
 "
 
   write_file "$REGISTRY_PATH" "$CONTENT"
@@ -157,17 +169,27 @@ done
 # ── bin/statutory-integrity.sh ───────────────────────────────────────────────
 
 echo ""
-echo "Installing SIVE script..."
+echo "Installing governance scripts..."
 install_file "$TEMPLATE_ROOT/bin/statutory-integrity.sh" "$TARGET_DIR/bin/statutory-integrity.sh"
+install_file "$TEMPLATE_ROOT/bin/governance-strict-audit.sh" "$TARGET_DIR/bin/governance-strict-audit.sh"
+install_file "$TEMPLATE_ROOT/bin/build-docs-site.sh" "$TARGET_DIR/bin/build-docs-site.sh"
 chmod +x "$TARGET_DIR/bin/statutory-integrity.sh" 2>/dev/null || true
+chmod +x "$TARGET_DIR/bin/governance-strict-audit.sh" 2>/dev/null || true
+chmod +x "$TARGET_DIR/bin/build-docs-site.sh" 2>/dev/null || true
 
 # ── .github/workflows ────────────────────────────────────────────────────────
 
 echo ""
-echo "Installing GitHub Actions workflows..."
+echo "Installing GitHub governance assets..."
 install_file "$TEMPLATE_ROOT/.github/workflows/governance.yml" "$TARGET_DIR/.github/workflows/governance.yml"
 install_file "$TEMPLATE_ROOT/.github/workflows/ci.yml" "$TARGET_DIR/.github/workflows/ci.yml"
+install_file "$TEMPLATE_ROOT/.github/workflows/verify.yml" "$TARGET_DIR/.github/workflows/verify.yml"
+install_file "$TEMPLATE_ROOT/.github/workflows/docs-publish.yml" "$TARGET_DIR/.github/workflows/docs-publish.yml"
+install_file "$TEMPLATE_ROOT/.github/workflows/post-merge-issue-closure.yml" "$TARGET_DIR/.github/workflows/post-merge-issue-closure.yml"
 install_file "$TEMPLATE_ROOT/.github/PULL_REQUEST_TEMPLATE.md" "$TARGET_DIR/.github/PULL_REQUEST_TEMPLATE.md"
+install_file "$TEMPLATE_ROOT/.github/ISSUE_TEMPLATE/governance-support.yml" "$TARGET_DIR/.github/ISSUE_TEMPLATE/governance-support.yml"
+install_file "$TEMPLATE_ROOT/.github/governance/branch-protection.md" "$TARGET_DIR/.github/governance/branch-protection.md"
+install_file "$TEMPLATE_ROOT/.github/governance/branch-protection-main.json" "$TARGET_DIR/.github/governance/branch-protection-main.json"
 
 # ── L0 foundation documents ──────────────────────────────────────────────────
 
@@ -192,16 +214,14 @@ echo "Installing root files..."
 install_file "$TEMPLATE_ROOT/CLAUDE.md" "$TARGET_DIR/CLAUDE.md"
 install_file "$TEMPLATE_ROOT/CHANGELOG.md" "$TARGET_DIR/CHANGELOG.md"
 
-# ── Register L0 docs in their registry ───────────────────────────────────────
-
 echo ""
 echo "──────────────────────────────────────────────────────────"
 echo "  Done. Next steps:"
 echo ""
 echo "  1. Edit CLAUDE.md — fill in the TODO sections"
-echo "  2. Update L0-000-artifact-registry — register L0-001 and L0-002"
-echo "  3. Add governance.yml SIVE job as a required status check in"
-echo "     GitHub → Settings → Branches → main branch protection rule"
+echo "  2. Run bash bin/statutory-integrity.sh && bash bin/governance-strict-audit.sh"
+echo "  3. Configure GitHub branch protection to require the verify check"
+echo "     using .github/governance/branch-protection.md"
 echo "  4. Commit everything: git add . && git commit -m 'chore: init L0-L7 governance scaffold'"
 echo "──────────────────────────────────────────────────────────"
 echo ""

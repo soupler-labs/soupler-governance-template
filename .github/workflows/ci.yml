@@ -1,7 +1,4 @@
-name: CI/CD
-
-# Triggers on every PR targeting main or develop.
-# Production deploy (push to main) belongs in a separate deploy-production.yml.
+name: CI
 
 on:
   pull_request:
@@ -13,28 +10,41 @@ concurrency:
 
 permissions:
   contents: read
-  pull-requests: write
-  deployments: write
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Stage 1 — Parallel checks (all must pass before build)
-# ─────────────────────────────────────────────────────────────────────────────
 jobs:
-  lint:
-    name: Lint
+  docs:
+    name: Documentation Governance
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-environment  # replace or inline your setup
-      - run: pnpm run lint                          # replace with your lint command
+      - run: bash bin/statutory-integrity.sh
+      - run: bash bin/governance-strict-audit.sh
 
-  typecheck:
-    name: Typecheck
+  project-quality:
+    name: Project Quality Placeholder
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-environment
-      - run: pnpm run typecheck                     # replace with your typecheck command
+      - name: Run package checks when package.json exists
+        run: |
+          if [ -f package.json ] && command -v corepack >/dev/null 2>&1; then
+            corepack enable
+            if [ -f pnpm-lock.yaml ]; then
+              pnpm install --frozen-lockfile
+              pnpm run lint --if-present
+              pnpm run typecheck --if-present
+              pnpm run test --if-present
+              pnpm run build --if-present
+            else
+              npm ci
+              npm run lint --if-present
+              npm run typecheck --if-present
+              npm test --if-present
+              npm run build --if-present
+            fi
+          else
+            echo "No package.json found; skipping project quality checks."
+          fi
 
   secret-scan:
     name: Secret Scan
@@ -49,49 +59,3 @@ jobs:
             | tar -xz -C /usr/local/bin gitleaks
       - name: Run Gitleaks
         run: gitleaks detect --source . --redact
-        # Add --config .gitleaks.toml if you have custom allowlists
-
-  test:
-    name: Unit Tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-environment
-      - run: pnpm run test                          # replace with your test command
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Stage 2 — Build (needs all Stage 1 checks green)
-# ─────────────────────────────────────────────────────────────────────────────
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    needs: [lint, typecheck, secret-scan, test]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-environment
-      - run: pnpm run build                         # replace with your build command
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Stage 3 — Preview deploy (optional; remove if not using Vercel)
-# ─────────────────────────────────────────────────────────────────────────────
-  deploy-preview:
-    name: Deploy Preview
-    runs-on: ubuntu-latest
-    needs: [build]
-    if: github.event_name == 'pull_request'
-    environment:
-      name: preview
-      url: ${{ steps.deploy.outputs.deployment-url }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-environment
-      - name: Deploy
-        id: deploy
-        run: |
-          # Replace the block below with your preview deploy command
-          deployment_url=$(npx vercel@latest --token ${{ secrets.VERCEL_TOKEN }} --yes)
-          echo "deployment-url=$deployment_url" >> "$GITHUB_OUTPUT"
-          echo "Preview deployment: $deployment_url" >> "$GITHUB_STEP_SUMMARY"
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}

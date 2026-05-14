@@ -1,0 +1,44 @@
+name: Governance Support Request
+description: Request help with docs governance, registries, issues, publishing, or remediation.
+title: "[GOV-SUPPORT] "
+labels: ["governance", "type: docs"]
+body:
+  - type: dropdown
+    id: request_type
+    attributes:
+      label: Request type
+      options:
+        - Add or update governed doc
+        - Registry/SIVE failure
+        - Strict governance audit failure
+        - GitHub issue/project setup
+        - Publishing/docs site
+        - Remediation/R-Track
+        - Other governance support
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What are you trying to do, and where are you blocked?
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Paste command output, links, screenshots, or file paths.
+    validations:
+      required: false
+  - type: dropdown
+    id: urgency
+    attributes:
+      label: Urgency
+      options:
+        - P0 - blocks merge or launch
+        - P1 - blocks active milestone
+        - P2 - important follow-up
+        - P3 - future improvement
+    validations:
+      required: true

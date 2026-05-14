@@ -16,6 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: bash bin/statutory-integrity.sh
+      - run: bash bin/governance-strict-audit.sh
 
   validate-pr:
     name: PR Metadata
@@ -30,8 +31,7 @@ jobs:
           echo "title_ok=false" >> "$GITHUB_OUTPUT"
           echo "body_ok=false"  >> "$GITHUB_OUTPUT"
           # Title format: [PROJECT-123] Short description
-          # Customize the regex below to match your project's prefix (e.g. SOUPLER, APP, MYCO)
-          echo "$PR_TITLE" | grep -Eq '^\[PROJECT-[0-9]+\] .+' && echo "title_ok=true" >> "$GITHUB_OUTPUT"
+          echo "$PR_TITLE" | grep -Eq '^\[[A-Z][A-Z0-9_-]*-[0-9]+\] .+' && echo "title_ok=true" >> "$GITHUB_OUTPUT"
           echo "${PR_BODY:-}" | grep -Eiq '(closes|close|fixes|fix|refs|ref)[: ]+#([0-9]+)' && echo "body_ok=true" >> "$GITHUB_OUTPUT"
 
       - name: Comment when invalid

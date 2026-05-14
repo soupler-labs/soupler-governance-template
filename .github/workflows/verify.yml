@@ -1,0 +1,37 @@
+name: verify
+
+on:
+  pull_request:
+    branches: [develop, main]
+    types: [opened, reopened, synchronize, edited]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Statutory Integrity Gate
+        run: bash bin/statutory-integrity.sh
+
+      - name: Governance Strict Audit
+        run: bash bin/governance-strict-audit.sh
+
+      - name: Optional Maven Parent Validation
+        run: |
+          if [ -f services/pom.xml ]; then
+            mvn -f services/pom.xml -N validate
+          else
+            echo "services/pom.xml not present; skipping Maven validation."
+          fi

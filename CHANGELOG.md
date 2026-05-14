@@ -9,6 +9,18 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Added strict governance audit script for document header, registry, remediation, and source-artifact validation.
+- Added docs site generation script and GitHub Pages publishing workflow.
+- Added stable `verify` workflow for branch-protection status checks.
+- Added governance support issue template, post-merge issue closure workflow, and branch-protection guidance.
+
+### Changed
+
+- Expanded the PR template with ship decision, test evidence, docs update, self-review, and risk sections.
+- Reworked CI into governance-first checks with conditional project quality commands.
+
 ---
 
 ## [0.1.0] — {{DATE}}
