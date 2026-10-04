@@ -41,7 +41,11 @@ test('CLAUDE.md states the governance contract and names siblings', () => {
   assert.match(c, /Doc-first/i);
   assert.match(c, /bin\/statutory-integrity\.sh/);
   assert.match(c, /`website`/);
-  assert.match(read('assets/CLAUDE.md'), /follows, it never leads/);
+  const assetsMd = read('assets/CLAUDE.md');
+  assert.match(assetsMd, /source of truth\*\* for the brand identity/);
+  assert.match(assetsMd, /brand change is made \*\*here first\*\*/);
+  assert.doesNotMatch(assetsMd, /never leads|copied from the owning repo/);
+  assert.match(read('platform/CLAUDE.md'), /`assets`.*Owns: logos, brand palette/);
 });
 
 test('rulesets are valid JSON and require every profile check', () => {
@@ -64,7 +68,7 @@ test('the template contains no individual or company-specific examples', () => {
   const self = new Set([import.meta.url.replace('file://', '')]);
   for (const f of walk(root)) {
     if (self.has(f) || f.includes('/node_modules/')) continue;
-    assert.doesNotMatch(fs.readFileSync(f, 'utf8'), /srivastava|sunny|galiaraa|PinGLogo|meridian/i, f);
+    assert.doesNotMatch(fs.readFileSync(f, 'utf8'), /srivastava|sunny|galiaraa|vedalogix|veda logix|PinGLogo|meridian/i, f);
   }
 });
 
@@ -106,4 +110,30 @@ test('personal-account owners get a repository-admin bypass and owner-only revie
   const bad = path.join(dir, 'bad.json');
   fs.writeFileSync(bad, JSON.stringify({ org: { name: 'X', bypass: 'everyone' }, repos: [{ name: 'a', profile: 'site' }] }));
   assert.match(gov(['new-org', path.join(dir, 'p'), '--config', bad]).stderr, /org\.bypass must be/);
+});
+
+test('assets repos are scaffolded with the numbered category tree, named after the org', () => {
+  const o = newOrg();
+  const base = path.join(o, 'assets', 'example-org-assets');
+  for (const d of ['01-brand/logos/svg', '01-brand/logos/png', '02-social-media/instagram', '02-social-media/linkedin', '02-social-media/youtube',
+    '03-app-store/listing/source', '03-app-store/listing/iphone', '03-app-store/listing/ipad', '04-documents']) {
+    assert.ok(fs.existsSync(path.join(base, d)), d);
+  }
+  for (const f of ['rendering/src/generate-logo-variants.mjs', 'rendering/src/render-svgs.mjs', 'package.json']) assert.ok(fs.existsSync(path.join(o, 'assets', f)), f);
+  assert.equal(JSON.parse(fs.readFileSync(path.join(o, 'assets/package.json'), 'utf8')).name, '@example-org/assets');
+  assert.equal(JSON.parse(fs.readFileSync(path.join(o, 'assets/package.json'), 'utf8')).packageManager, 'pnpm@9.15.9');
+  assert.match(fs.readFileSync(path.join(o, 'assets/README.md'), 'utf8'), /source of truth for Example Org's brand/);
+});
+
+test('the generated logo script derives mono variants and a square favicon from the primary SVGs', () => {
+  const o = newOrg();
+  const svgDir = path.join(o, 'assets/example-org-assets/01-brand/logos/svg');
+  const svg = (w, h) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}"><title id="t">t</title><g transform="translate(0 0)"><path fill="#033561" d="M0 0h10v10z"/></g></svg>\n`;
+  fs.writeFileSync(path.join(svgDir, 'example-org-logo-full-primary.svg'), svg(200, 100));
+  fs.writeFileSync(path.join(svgDir, 'example-org-logo-mark-primary.svg'), svg(100, 60));
+  const r = sh('node', ['rendering/src/generate-logo-variants.mjs'], { cwd: path.join(o, 'assets') });
+  assert.equal(r.status, 0, r.stderr);
+  assert.match(fs.readFileSync(path.join(svgDir, 'example-org-logo-full-mono-white.svg'), 'utf8'), /fill="#ffffff"/);
+  assert.match(fs.readFileSync(path.join(svgDir, 'example-org-logo-mark-mono-black.svg'), 'utf8'), /fill="#000000"/);
+  assert.match(fs.readFileSync(path.join(svgDir, 'favicon.svg'), 'utf8'), /viewBox="0 0 100 100"/);
 });

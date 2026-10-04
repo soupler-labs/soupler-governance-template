@@ -52,7 +52,12 @@ export function normalizeConfig(raw) {
   const features = { docsSite: false, ...raw.features };
   const layerFolders = { ...raw.layerFolders };
 
-  const repos = (raw.repos ?? []).map((r) => ({ description: '', owns: [], follows: [], ...r }));
+  const repos = (raw.repos ?? []).map((r) => {
+    const base = { description: '', owns: [], follows: [], ...r };
+    // A profile can declare what its repos own by default (e.g. the assets repo owns the brand).
+    if (base.owns.length === 0) { try { base.owns = readProfile(base.profile).defaultOwns ?? []; } catch { /* reported below */ } }
+    return base;
+  });
   if (repos.length === 0) errs.push('at least one repo is required');
   const seen = new Set();
   for (const r of repos) {

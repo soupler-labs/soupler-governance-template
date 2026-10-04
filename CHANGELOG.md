@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-10-05
+
+### Changed
+- The `assets` profile now makes the repo the **source of truth for the brand** by default (logos, palette, fonts, media). Other repos are told to take their brand from it. Previously it assumed the product repo owned the brand and `assets` followed it.
+- `follows` wording in generated `CLAUDE.md` files now says what is followed (`follows that one for <what it owns>`), and sibling lines use a consistent separator.
+
+### Added
+- The `assets` profile scaffolds a numbered category tree named after the org (`<slug>-assets/01-brand/logos/{svg,png}`, `02-social-media/{instagram,linkedin,youtube}`, `03-app-store/listing/{source,iphone,ipad}`, `04-documents`), `rendering/src` scripts that derive mono-black, mono-white and favicon variants from the primary logos and render PNGs (`pnpm render:logos`), a `package.json`, and a README with the structure tree.
+- `gov sync --config <file>` adopts an updated org config (for example changed ownership) and refreshes every generated section.
+- Folder and file names in profiles can contain template variables.
+- Profiles can declare `defaultOwns`.
+
 ## [1.1.0] - 2026-10-04
 
 ### Added

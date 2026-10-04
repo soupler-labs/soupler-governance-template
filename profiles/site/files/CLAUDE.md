@@ -27,7 +27,7 @@ TODO — external calls this site makes (and which backends it must NOT call). I
 
 @@#if hasSiblings@@
 @@#each siblings as s@@
-- **`@@s.name@@`** (`@@s.path@@`) — @@s.description@@@@#if s.hasOwns@@ Owns: @@s.ownsList@@.@@/if@@@@#if s.followed@@ **This repo follows that one, not the reverse.**@@/if@@
+- **`@@s.name@@`** (`@@s.path@@`) — @@s.description@@@@#if s.hasOwns@@ · Owns: @@s.ownsList@@@@/if@@@@#if s.followed@@ · **This repo follows that one@@#if s.hasOwns@@ for @@s.ownsList@@@@/if@@, not the reverse.**@@/if@@
 @@/each@@
 
 **Never modify a sibling's files from inside this repo.** Work in the repo that owns the change.

@@ -1,0 +1,16 @@
+{
+  "name": "@@@org.slug@@/assets",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "@@org.name@@ brand and static-media assets",
+  "packageManager": "pnpm@@@stack.pnpm@@",
+  "scripts": {
+    "generate:logo-variants": "node rendering/src/generate-logo-variants.mjs",
+    "render:svg": "node rendering/src/render-svgs.mjs",
+    "render:logos": "pnpm generate:logo-variants && pnpm render:svg"
+  },
+  "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2"
+  }
+}
