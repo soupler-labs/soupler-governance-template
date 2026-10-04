@@ -42,6 +42,10 @@ The generated repos' `CLAUDE.md`, `.claude/skills/doc-governance/SKILL.md`, `.cl
 5. **Adoption must stay safe.** `gov adopt`/`sync` never overwrite a file a team edited. The SIVE gate runs in *adoption mode* (warnings for header/registry drift) unless `.governance/sive.json` says `strict: true`.
 6. **Never commit generated org directories** or anything with a real secret.
 
-## Git workflow
+## Git workflow and protection (this repo is public and protected)
 
-Branch from `develop`, PR to `develop` (this repo is stamped with its own conventions where practical). Conventional Commits. **Commit and push only when asked.** No AI attribution in commits or PR descriptions.
+- Branch from `develop`, PR into `develop`. **`main` only ever receives `develop`** (`Branch Policy` check). Never commit or push directly to `main` or `develop` - the rulesets refuse it for everyone except the maintainer's PR-only bypass.
+- Rulesets live in `.github/governance/rulesets/` (apply with `gov github <repo-dir> --rulesets-only`): PR required, 1 approval from the code owner (`.github/CODEOWNERS`), required checks `Tests` + `PR Title` (+ `Branch Policy` on `main`), no force-push, no deletion; `develop` squash/rebase and linear, `main` merge commits. Bypass is the repository Admin role, via pull request only.
+- PR titles are Conventional Commits; the `develop` -> `main` promotion starts with `release:`.
+- Licensed Apache-2.0 (see `LICENSE`, `NOTICE`); contributions come via forks per `CONTRIBUTING.md`.
+- **Commit and push only when asked.** No AI attribution in commits or PR descriptions.

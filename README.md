@@ -524,4 +524,12 @@ pnpm generate    # run the wizard
 
 Read [CLAUDE.md](CLAUDE.md) before changing anything: it explains the architecture, the file kinds, and the rules for contributing. [docs/usage.md](docs/usage.md) has the long-form CLI guide.
 
-Zero runtime dependencies · Node ≥ 20 · Soupler.
+Zero runtime dependencies · Node ≥ 20.
+
+---
+
+## License and contributing
+
+Copyright 2026 Soupler. Licensed under the [Apache License 2.0](LICENSE) - you may use, modify and redistribute this template, including to enforce documentation standards in your own organisation, under the terms of that license (see [NOTICE](NOTICE)). **What you generate is yours:** the license places no restriction on repositories and documents produced by the generator.
+
+This repository is open source but maintained by Soupler: `main` and `develop` are protected, every change goes through a pull request, and only the maintainer approves and merges. Contributions are welcome through forks - see [CONTRIBUTING.md](CONTRIBUTING.md). Report vulnerabilities privately per [SECURITY.md](SECURITY.md).
