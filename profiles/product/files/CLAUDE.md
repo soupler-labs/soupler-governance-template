@@ -51,7 +51,7 @@ TODO — what this product does in 1–2 sentences.
 @@org.name@@ spans several repositories, siblings under one parent directory. **Never modify a sibling's files from inside this repo** — work in the repo that owns the change, and say so if a change is needed elsewhere.
 
 @@#each siblings as s@@
-- **`@@s.name@@`** (`@@s.path@@`) — @@s.description@@@@#if s.hasOwns@@ Owns: @@s.ownsList@@.@@/if@@@@#if s.followed@@ **This repo follows that one, not the reverse.**@@/if@@@@#if s.followsThis@@ It follows this repo — if you change what it follows, update it separately afterward.@@/if@@
+- **`@@s.name@@`** (`@@s.path@@`) — @@s.description@@@@#if s.hasOwns@@ · Owns: @@s.ownsList@@@@/if@@@@#if s.followed@@ · **This repo follows that one@@#if s.hasOwns@@ for @@s.ownsList@@@@/if@@, not the reverse.**@@/if@@@@#if s.followsThis@@ · It follows this repo — if you change what it follows, update it separately afterward.@@/if@@
 @@/each@@
 @@#if repo.hasOwns@@
 

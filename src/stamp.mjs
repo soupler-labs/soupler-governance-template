@@ -32,8 +32,9 @@ export function plan(config, repo, now = new Date()) {
   for (const root of ['_base', repo.profile]) {
     const dir = path.join(TEMPLATE_ROOT, 'profiles', root, 'files');
     for (const rel of walk(dir)) {
-      const dest = remapFolder(rel.replace(/\.tpl$/, ''), config);
       const key = rel.replace(/\.tpl$/, '');
+      // Folder and file names may carry template variables, e.g. @@org.slug@@-assets/…
+      const dest = remapFolder(key.includes('@@') ? render(key, ctx, `${root}/${rel}`) : key, config);
       const cond = conditional[key];
       if (cond && !evalFlag(cond, ctx)) { out.delete(dest); continue; }
       if (profile.exclude?.includes(dest) && root === '_base') continue;
