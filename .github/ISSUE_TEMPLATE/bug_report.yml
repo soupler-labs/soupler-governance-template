@@ -1,0 +1,15 @@
+name: Bug report
+description: The generator or a generated file is wrong
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes: { label: What happened, description: "Expected vs actual" }
+    validations: { required: true }
+  - type: textarea
+    id: repro
+    attributes: { label: Steps to reproduce, description: "Include your answers or governance.json (remove anything private)", render: shell }
+    validations: { required: true }
+  - type: input
+    id: env
+    attributes: { label: Node / OS / template version }

@@ -1,0 +1,28 @@
+name: Branch Policy
+
+# `main` may only be updated from `develop`. A ruleset can require a PR and checks but cannot see which branch
+# a PR comes from, so this workflow is the only thing enforcing "feature -> develop -> main".
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  source-branch:
+    name: Branch Policy
+    runs-on: ubuntu-latest
+    steps:
+      - name: main may only be updated from develop
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          if [ "$HEAD_REF" = "develop" ]; then
+            echo "OK - $HEAD_REF -> $BASE_REF"
+            exit 0
+          fi
+          echo "::error title=Wrong source branch::main may only be updated from develop, not '$HEAD_REF'."
+          echo "Retarget this PR at develop. Once merged there, the maintainer promotes develop -> main."
+          exit 1

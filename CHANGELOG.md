@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-04
+
+### Added
+- Apache-2.0 `LICENSE` and `NOTICE`, `CONTRIBUTING.md`, `SECURITY.md`, issue and PR templates, `CODEOWNERS`.
+- Repository protection for this repo: rulesets (PR-only, owner approval, required `Tests`/`PR Title`/`Branch Policy`, no force-push or deletion), `Branch Policy` and `PR Title` workflows.
+- Generator option `org.bypass` (`organization-admin` | `repository-admin`) so personal GitHub accounts get a valid bypass actor; rulesets now require code-owner review whenever `org.codeowners` is set.
+
 ## [1.0.0] - 2026-10-04
 
 ### Added
