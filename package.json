@@ -1,0 +1,19 @@
+{
+  "name": "soupler-governance-template",
+  "version": "1.0.0",
+  "description": "Generator for the Soupler L0\u2013L7 documentation-governance ecosystem: repos, doc layers, CI gates, hooks, rulesets and agent instructions.",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "gov": "./bin/gov.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "generate": "node bin/gov.mjs create",
+    "test": "node --test tests/*.test.mjs",
+    "gov": "node bin/gov.mjs"
+  },
+  "packageManager": "pnpm@9.15.9"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "package",
+  "role": "Shared content/library package consumed by other repos via a pinned tag",
+  "layers": [],
+  "regulatedLayers": [],
+  "requiredChecks": ["Statutory Integrity", "PR Metadata", "Secret Scan"],
+  "managed": [],
+  "exclude": [".github/workflows/ci.yml"]
+}

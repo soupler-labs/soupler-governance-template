@@ -1,0 +1,15 @@
+{
+  "name": "assets",
+  "role": "Brand and static-media assets (follows the product, never leads it)",
+  "layers": [],
+  "regulatedLayers": [],
+  "requiredChecks": [
+    "Statutory Integrity",
+    "PR Metadata",
+    "Secret Scan"
+  ],
+  "managed": [],
+  "exclude": [
+    ".github/workflows/ci.yml"
+  ]
+}
