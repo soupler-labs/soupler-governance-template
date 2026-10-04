@@ -128,3 +128,19 @@ test('a GitHub free-plan ruleset rejection is recognised as a plan limit, not a 
   assert.ok(isPlanLimit('gh: Upgrade to GitHub Pro or make this repository public to enable this feature. (HTTP 403)'));
   assert.ok(!isPlanLimit('HTTP 422: Validation Failed'));
 });
+
+test('sync --config adopts changed ownership and refreshes the sibling sections', () => {
+  const org = newOrg();
+  const cfg = JSON.parse(fs.readFileSync(path.join(org, 'governance.json'), 'utf8'));
+  cfg.repos.find((r) => r.name === 'assets').owns = ['the logo and brand palette'];
+  const f = path.join(org, 'new.json');
+  fs.writeFileSync(f, JSON.stringify(cfg));
+  const r = gov(['sync', path.join(org, 'platform'), '--config', f]);
+  assert.equal(r.status, 0, r.stderr);
+  assert.match(fs.readFileSync(path.join(org, 'platform/CLAUDE.md'), 'utf8'), /follows that one for the logo and brand palette, not the reverse/);
+});
+
+test('an assets repo owns the brand by default, so followers are told to take the brand from it', () => {
+  const org = newOrg();
+  assert.match(fs.readFileSync(path.join(org, 'website/CLAUDE.md'), 'utf8'), /`assets`.*Owns: logos, brand palette/);
+});

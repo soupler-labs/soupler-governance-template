@@ -1,6 +1,6 @@
 {
   "name": "assets",
-  "role": "Brand and static-media assets (follows the product, never leads it)",
+  "role": "Brand and static-media assets (source of truth for logos, palette and brand media)",
   "layers": [],
   "regulatedLayers": [],
   "requiredChecks": [
@@ -11,5 +11,8 @@
   "managed": [],
   "exclude": [
     ".github/workflows/ci.yml"
+  ],
+  "defaultOwns": [
+    "logos, brand palette, fonts and brand/static media"
   ]
 }

@@ -121,15 +121,15 @@ Below is a complete, realistic run for a hypothetical company **Example Org**, b
 
 You add repositories one at a time. For each you answer five things, then choose whether to add another. A typical product has three.
 
-**Repo 1 — the product codebase**
+**Repo 1 — the product codebase** *(the main codebase; it owns product facts such as API contracts and data models, and takes its brand from the assets repo)*
 
 | Question | Example answer | What it does |
 |---|---|---|
 | Repo name (kebab-case) | `platform` | Folder name and GitHub repo name. Lowercase, hyphens only. |
 | Type | `product` | Picks the layer set, workflows and `CLAUDE.md` style. See [Repository types](#repository-types). |
 | One-line description | `Parcel shipping and freight marketplace: mobile app, admin, backend services.` | Appears in the repo's README, in siblings' `CLAUDE.md`, and in the GitHub repo description. |
-| Follows which repos? | *(blank)* | The main codebase doesn't follow anyone — others follow *it*. |
-| Source of truth for? | `brand mark and palette, API contracts, shared data models` | Rendered as "this repo is the source of truth for…" so agents never edit those things in a follower. |
+| Follows which repos? | `assets` | Takes its brand (logo, palette) from the assets repo. Use *(blank)* if it follows nobody. |
+| Source of truth for? | `API contracts, shared data models` | Rendered as "this repo is the source of truth for…" so agents never edit those things in a follower. |
 
 **Repo 2 — the public website**
 
@@ -138,7 +138,7 @@ You add repositories one at a time. For each you answer five things, then choose
 | Repo name | `website` | |
 | Type | `site` | Gets L3 (and L6/L6.1/L7 if regulated). No L0 copy — it points at the standards repo. |
 | Description | `Public marketing site, deployed to example.org.` | |
-| Follows which repos? | `platform` | Its `CLAUDE.md` will say: *"follows platform, never the reverse — change brand/product facts there first."* |
+| Follows which repos? | `platform, assets` | Its `CLAUDE.md` will say it follows both: product facts come from `platform`, the brand comes from `assets` - change them there first. |
 | Source of truth for? | *(blank)* | |
 
 **Repo 3 — brand assets**
@@ -146,14 +146,14 @@ You add repositories one at a time. For each you answer five things, then choose
 | Question | Example answer | What it does |
 |---|---|---|
 | Repo name | `assets` | |
-| Type | `assets` | Minimal: no doc layers, just governance files and an "I follow, I never lead" `CLAUDE.md`. |
+| Type | `assets` | Minimal: no doc layers, just governance files and a `CLAUDE.md` that makes this repo the brand's source of truth. |
 | Description | `Logo family, social templates and campaign renders.` | |
-| Follows which repos? | `platform` | |
-| Source of truth for? | *(blank)* | |
+| Follows which repos? | *(blank)* | The brand starts here, so it follows nobody. |
+| Source of truth for? | *(Enter - defaults to logos, palette, fonts and brand media)* | Rendered into every other repo's `CLAUDE.md` as "takes its brand from this repo". |
 
 When asked **"Add another repository?"** answer `y` until you've entered them all, then `n`.
 
-> **Direction matters.** "Follows" points at the repo that *leads*. If `website` follows `platform`, then a brand-colour change is made in `platform` first and copied to `website` afterwards — never the reverse. Getting this backwards produces agent instructions that tell Claude to edit the wrong repo.
+> **Direction matters.** "Follows" points at the repo that *leads*. If `website` follows `assets`, then a logo or brand-colour change is made in `assets` first and copied to `website` afterwards — never the reverse. Getting this backwards produces agent instructions that tell Claude to edit the wrong repo.
 
 ### Part 4 — The wiring
 
@@ -205,8 +205,9 @@ flowchart TB
             A1["CLAUDE.md · governance files only"]
         end
     end
-    W -. "follows" .-> P
-    A -. "follows" .-> P
+    W -. "product facts" .-> P
+    W -. "brand" .-> A
+    P -. "brand" .-> A
 ```
 
 Every repo is already a git repository on `main`, with one initial commit, a `develop` branch, and `core.hooksPath` pointed at `.githooks`.
@@ -362,7 +363,7 @@ The full text of the principles — with the *reason* behind each — is `docs/L
 |---|---|---|---|
 | **`product`** | The main codebase: apps, services, shared packages | L0–L5 *(+ L6, L6.1, L7 if regulated)* | Usually holds the org's L0 standards. Gets the long-form `CLAUDE.md` with testing, definition of done and engineering principles. |
 | **`site`** | A public website | L3 *(+ L6, L6.1, L7 if regulated)* | Points at the standards repo for L0. Has its own audits and its own chain of custody. |
-| **`assets`** | Brand and static media | none | Follows the product: tokens and marks are copied from the owner, never invented here. |
+| **`assets`** | Brand and static media | none | The **source of truth for the brand**: logos, palette, fonts, media. Other repos take their brand from here. Declare anything it must follow with `follows`. |
 | **`package`** | Shared content or library consumed by other repos via a pinned tag | none | The single place a fact is edited; consumers bump their pin. |
 
 Each repo that runs remediation keeps its **own** L6 → L6.1 → L7 chain; session numbers are per-repo, so cite another repo's session as "website R-012".
