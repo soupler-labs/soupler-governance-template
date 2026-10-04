@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+# Job names are the required status checks in .github/governance/rulesets/*.json.
+# Rename a job and you must rename it there in the same PR, or it silently stops being enforced.
+#
+# These are seed jobs. They pass trivially until the repo has a package.json, so a fresh scaffold is green;
+# once it has one they run your real install / lint / type-check / test commands. Add stack-specific jobs
+# (migrations, e2e, scans) here and add their names to the required checks.
+jobs:
+  quality:
+    name: Quality Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Skip until the project has a package.json
+        if: hashFiles('package.json') == ''
+        run: echo "No package.json yet - nothing to lint or type-check."
+@@#if stack.isPnpm@@
+      - uses: pnpm/action-setup@v4
+        if: hashFiles('package.json') != ''
+        with:
+          version: @@stack.pnpm@@
+@@/if@@
+      - uses: actions/setup-node@v4
+        if: hashFiles('package.json') != ''
+        with:
+          node-version: @@stack.node@@
+      - run: @@commands.install@@
+        if: hashFiles('package.json') != ''
+      - run: @@commands.lint@@
+        if: hashFiles('package.json') != ''
+      - run: @@commands.typeCheck@@
+        if: hashFiles('package.json') != ''
+
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Skip until the project has a package.json
+        if: hashFiles('package.json') == ''
+        run: echo "No package.json yet - nothing to test."
+@@#if stack.isPnpm@@
+      - uses: pnpm/action-setup@v4
+        if: hashFiles('package.json') != ''
+        with:
+          version: @@stack.pnpm@@
+@@/if@@
+      - uses: actions/setup-node@v4
+        if: hashFiles('package.json') != ''
+        with:
+          node-version: @@stack.node@@
+      - run: @@commands.install@@
+        if: hashFiles('package.json') != ''
+      - run: @@commands.test@@
+        if: hashFiles('package.json') != ''

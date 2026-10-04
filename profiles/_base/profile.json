@@ -1,0 +1,24 @@
+{
+  "name": "_base",
+  "role": "shared governance base",
+  "layers": [],
+  "managed": [
+    ".githooks/",
+    "bin/install-hooks.sh",
+    "bin/run-gitleaks.sh",
+    "bin/statutory-integrity.sh",
+    "bin/statutory-integrity.mjs",
+    "bin/governance-brief.sh",
+    ".github/workflows/branch-policy.yml",
+    ".github/workflows/pr-governance.yml",
+    ".github/workflows/post-merge-issue-closure.yml",
+    ".github/workflows/secret-scan.yml",
+    ".github/governance/",
+    ".github/PROTECTION_GUIDE.md",
+    ".claude/skills/",
+    ".claude/commands/"
+  ],
+  "conditional": {
+    ".github/CODEOWNERS": "org.codeowners"
+  }
+}

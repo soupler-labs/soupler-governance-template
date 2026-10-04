@@ -1,0 +1,8 @@
+{
+  "org": { "name": "Example Org", "github": "example-org", "owner": "Example Org", "regulated": false },
+  "repos": [
+    { "name": "platform", "profile": "product", "description": "The product monorepo." },
+    { "name": "website", "profile": "site", "description": "Public website.", "follows": ["platform"] },
+    { "name": "assets", "profile": "assets", "description": "Brand assets.", "follows": ["platform"] }
+  ]
+}

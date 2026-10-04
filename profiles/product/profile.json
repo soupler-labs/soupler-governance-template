@@ -1,0 +1,30 @@
+{
+  "name": "product",
+  "role": "Product codebase (apps, services, shared packages)",
+  "layers": [
+    "L0",
+    "L1",
+    "L2",
+    "L2.5",
+    "L3",
+    "L4",
+    "L5"
+  ],
+  "regulatedLayers": [
+    "L6",
+    "L6.1",
+    "L7"
+  ],
+  "requiredChecks": [
+    "Statutory Integrity",
+    "PR Metadata",
+    "Quality Checks",
+    "Tests",
+    "Secret Scan"
+  ],
+  "managed": [],
+  "conditional": {
+    "docs/L6-remediation/L6-001-remediation-protocol-v1.md": "has.L6",
+    "docs/L7-forensics/L7-001-master-registry-v1.md": "has.L7"
+  }
+}

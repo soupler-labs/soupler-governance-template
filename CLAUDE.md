@@ -1,41 +1,47 @@
-# {{PROJECT_NAME}} — Project Instructions
+# soupler-governance-template — Project Instructions
 
-## Project
+This repository is **Soupler's governance generator**. One command stamps a complete, enforced documentation-governance ecosystem — repos, L0–L7 doc layers, CI gates, git hooks, rulesets, PR/issue templates, and `CLAUDE.md` agent instructions — into any new organisation or product. It captures an operating model that has run in production, including the corrections it accumulated, and must stay faithful to those lessons.
 
-TODO — describe what this project does (1–2 sentences).
+Always refer to the company as **Soupler** (or the target org's own name in generated output). **Never write an individual's name anywhere in this repository** — not in docs, templates, headers, version-history rows or examples. `tests/generate.test.mjs` fails the build if one appears.
 
-- **Stack**: TODO — list your stack (e.g. Next.js, Node.js, PostgreSQL)
-- **Monorepo**: TODO — list your apps/packages (or delete if single-repo)
+## What this repo is NOT
 
-## Active Documentation Layers
+It is not a product repo and not a place for any one organisation's or product's content — no company-specific names, products, repos or examples. Org-specific facts belong in that org's `governance.json` or its own repos. If a rule is genuinely general, generalise it here; if not, leave it out.
 
-| Layer | Folder | Purpose |
-|---|---|---|
-| L0 | `docs/L0-foundation/` | Naming conventions, document templates |
-| L1 | `docs/L1-strategy/` | Vision, positioning, business objectives |
-| L2 | `docs/L2-product/` | Requirements, PRDs, user stories |
-| L2.5 | `docs/L2.5-design-ux/` | UX flows, component specs |
-| L2.6 | `docs/L2.6-delivery-stories/` | Sprint backlogs, delivery tracking |
-| L3 | `docs/L3-architecture/` | ADRs, system design, API contracts |
-| L4 | `docs/L4-infrastructure/` | CI/CD, deployment, cloud configuration |
-| L5 | `docs/L5-operations/` | Runbooks, incident response |
-| L6 | `docs/L6-remediation/` | SEV audit findings and corrective plans |
-| L6.1 | `docs/L6.1-remediation-execution/` | Sprint execution workspaces |
-| L7 | `docs/L7-forensics/` | Chain of custody — audit → execution → PRs |
+## Mental model (read before editing anything)
 
-## Governance Rules
+```
+governance.json (org + repos + rules)
+        │  normalizeConfig  →  contextFor(repo)            src/config.mjs
+        ▼
+profiles/_base/files  ─┐   render (@@ … @@)                src/render.mjs
+profiles/<profile>/files ┴─►  plan() → Map<path,{content,kind}>   src/stamp.mjs
+generated registries  ────┘                                 src/generated.mjs
+        ▼
+apply(): init | adopt | sync   →  files + .governance/manifest.json
+        ▼
+src/github.mjs: create repo · push · apply rulesets (explicit confirmation)
+```
 
-- Every new `.md` artifact must be registered in that layer's `-000-artifact-registry` in the same commit
-- SIVE (`bin/statutory-integrity.sh`) enforces this on every PR — unregistered files block merge
-- Always update `CHANGELOG.md` when making code or doc changes
-- Follow the naming convention in `docs/L0-foundation/L0-002-naming-convention-v1.md`
+- **Profiles** (`profiles/<name>/profile.json` + `files/`): `product`, `site`, `assets`, `package`; `_base` is layered under every one. A profile file with the same path overrides base.
+- **File kinds**: *managed* (listed in `profile.json` `managed`; template owns it; `gov sync` updates it only if the repo copy is untouched since last sync, otherwise writes `<file>.governance-new`) vs *seeded* (written once, then the org owns it). Seeded Markdown may contain `@@#region name@@ … @@/region@@` spans that `gov sync` keeps current (sibling lists, layer tables, topology).
+- **Delimiters are `@@ … @@`**, not `{{ }}`, because generated files are full of `${{ github.* }}`. Unknown variables are a hard error.
+- **Registries are generated** (`src/generated.mjs`) from the docs a profile ships, so a fresh repo passes its own gate.
+- **Required status checks** come from `profile.json` `requiredChecks` and must equal CI job `name:`s. A test enforces it.
 
-## Behaviour
+## The rules this generator exists to enforce in generated repos
 
-TODO — describe how you want the AI assistant to work in this project.
+The generated repos' `CLAUDE.md`, `.claude/skills/doc-governance/SKILL.md`, `.claude/settings.json` (SessionStart hook → `bin/governance-brief.sh`) and `.claude/commands/*` are how coding agents are made to follow doc governance on *every* task: classify the change → owning layer gets the first edit → doc-first (chain exists before code) → register every doc → CHANGELOG → run the gate → commit only when asked. When you change these, you change how every future project's agent behaves — treat them as the product.
 
-Example:
-- Work directly — no meta-layer orchestration
-- Write code, run commands, verify output
-- Classify each change first: strategic (L1), product (L2), engineering (L3), or operational (L0/L4/L5)
-- For engineering changes, update the owning L3 artifact when behaviour or contracts change
+## Working rules for this repo
+
+1. **Doc-first applies here too.** A change to generated behaviour starts in `docs/` (or the L0 doc templates under `profiles/product/files/docs/L0-foundation/`), then templates, then code.
+2. **Every behaviour change has a test that fails without it** (`pnpm test` runs `node --test tests/*.test.mjs`; zero dependencies). Generated output is tested by actually generating an org and running its gate, hooks and sync.
+3. **Bump `package.json` version** when generated output changes (semver: breaking = existing repos' managed files change meaning; minor = new files/options; patch = fixes). Update `CHANGELOG.md`.
+4. **Lessons are general or absent.** When a real incident teaches a governed repo a new rule, port the *general* lesson (with its reason, never the company-specific story) into the L0 docs or `CLAUDE.md` templates.
+5. **Adoption must stay safe.** `gov adopt`/`sync` never overwrite a file a team edited. The SIVE gate runs in *adoption mode* (warnings for header/registry drift) unless `.governance/sive.json` says `strict: true`.
+6. **Never commit generated org directories** or anything with a real secret.
+
+## Git workflow
+
+Branch from `develop`, PR to `develop` (this repo is stamped with its own conventions where practical). Conventional Commits. **Commit and push only when asked.** No AI attribution in commits or PR descriptions.
