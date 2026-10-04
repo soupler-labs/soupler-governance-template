@@ -92,3 +92,18 @@ test('a regulated org with a renamed layer folder and a shared package generates
   assert.match(c, /source of truth for:\*\* brand tokens/);
   for (const repo of ['core', 'web']) assert.equal(sh('bash', ['bin/statutory-integrity.sh'], { cwd: path.join(o, repo) }).status, 0, repo);
 });
+
+test('personal-account owners get a repository-admin bypass and owner-only review in the rulesets', () => {
+  const dir = tmp();
+  const cfg = path.join(dir, 'c.json');
+  fs.writeFileSync(cfg, JSON.stringify({ org: { name: 'Solo', bypass: 'repository-admin', codeowners: '@solo', requiredReviews: 1 }, repos: [{ name: 'app', profile: 'product' }] }));
+  assert.equal(gov(['new-org', path.join(dir, 'o'), '--config', cfg]).status, 0);
+  const r = JSON.parse(fs.readFileSync(path.join(dir, 'o/app/.github/governance/rulesets/main-protection.json'), 'utf8'));
+  assert.deepEqual(r.bypass_actors, [{ actor_id: 5, actor_type: 'RepositoryRole', bypass_mode: 'pull_request' }]);
+  const pr = r.rules.find((x) => x.type === 'pull_request').parameters;
+  assert.equal(pr.require_code_owner_review, true);
+  assert.equal(pr.required_approving_review_count, 1);
+  const bad = path.join(dir, 'bad.json');
+  fs.writeFileSync(bad, JSON.stringify({ org: { name: 'X', bypass: 'everyone' }, repos: [{ name: 'a', profile: 'site' }] }));
+  assert.match(gov(['new-org', path.join(dir, 'p'), '--config', bad]).stderr, /org\.bypass must be/);
+});

@@ -40,6 +40,10 @@ export function normalizeConfig(raw) {
   org.defaultBranch ??= 'develop';
   org.regulated ??= false;
   org.visibility ??= 'private';
+  // Who may bypass the PR rules (still only via a pull request, never a direct push). Personal GitHub accounts have no
+  // 'organization admin', so they use 'repository-admin'.
+  org.bypass ??= 'organization-admin';
+  if (!['organization-admin', 'repository-admin'].includes(org.bypass)) errs.push(`org.bypass must be organization-admin or repository-admin (got "${org.bypass}")`);
 
   const rules = { noAiAttribution: true, releasePrTitle: 'release', requireDocsUpdate: true, ...raw.rules };
   const commands = { install: 'pnpm install --frozen-lockfile', lint: 'pnpm lint', typeCheck: 'pnpm type-check', test: 'pnpm test', ...raw.commands };
@@ -110,6 +114,10 @@ export function contextFor(config, repo, now = new Date()) {
     siblings, hasSiblings: siblings.length > 0, repos: config.repos,
     checks, checksJson: checks.map((c) => `{ "context": "${c}" }`).join(',\n            '),
     reviews: config.org.requiredReviews ?? 0,
+    codeOwnerReview: Boolean(config.org.codeowners),
+    bypassJson: config.org.bypass === 'repository-admin'
+      ? '{ "actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "pull_request" }'
+      : '{ "actor_id": null, "actor_type": "OrganizationAdmin", "bypass_mode": "pull_request" }',
     template: { version: TEMPLATE_VERSION },
   };
 }
