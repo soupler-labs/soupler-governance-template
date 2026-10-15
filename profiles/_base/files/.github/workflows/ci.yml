@@ -20,7 +20,7 @@ jobs:
     name: Quality Checks
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Skip until the project has a package.json
         if: hashFiles('package.json') == ''
         run: echo "No package.json yet - nothing to lint or type-check."
@@ -30,7 +30,7 @@ jobs:
         with:
           version: @@stack.pnpm@@
 @@/if@@
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         if: hashFiles('package.json') != ''
         with:
           node-version: @@stack.node@@
@@ -45,7 +45,7 @@ jobs:
     name: Tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Skip until the project has a package.json
         if: hashFiles('package.json') == ''
         run: echo "No package.json yet - nothing to test."
@@ -55,7 +55,7 @@ jobs:
         with:
           version: @@stack.pnpm@@
 @@/if@@
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         if: hashFiles('package.json') != ''
         with:
           node-version: @@stack.node@@
