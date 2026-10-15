@@ -80,7 +80,7 @@ Then fill the `TODO`s in `CLAUDE.md` (project, stack, apps map) — the agent na
 | `layerFolders` | rename a layer folder, e.g. `{ "L3": "L3-engineering" }` |
 | `rules.noAiAttribution` | hook + CI block AI attribution (default true) |
 | `rules.releasePrTitle` | prefix for `develop`→`main` PRs (default `release`) |
-| `rules.requireDocsUpdate` | CI requires the `## Docs update` block (default true) |
+| `rules.requireDocsUpdate` | CI requires the `## Docs update` block (default true); PRs opened by `dependabot[bot]` are exempt |
 | `commands` `stack` | lint/type-check/test/install commands, node/pnpm versions → CI and CLAUDE.md |
 | `repos[].profile` | `product` · `site` · `assets` · `package` |
 | `repos[].owns` / `follows` | source-of-truth direction, rendered into sibling sections |
