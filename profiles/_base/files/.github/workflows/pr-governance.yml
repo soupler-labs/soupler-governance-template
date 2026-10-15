@@ -13,8 +13,8 @@ jobs:
     name: Statutory Integrity
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
       - name: Statutory Integrity Verification Engine
@@ -29,6 +29,7 @@ jobs:
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_BODY: ${{ github.event.pull_request.body }}
           HEAD_REF: ${{ github.head_ref }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
           BASE_REF: ${{ github.base_ref }}
         run: |
           fail=0
@@ -45,10 +46,15 @@ jobs:
 @@#if rules.requireDocsUpdate@@
           # `## Docs update` must carry a real status — the governance contract (L0-006) says every change either
           # updated its owning docs or states why it is exempt. Blank is not an answer.
-          echo "$PR_BODY" | grep -Eq '^- Status:[[:space:]]*`?(UPDATED|EXEMPT)`?[[:space:]]*$' \
-            || err "PR body needs '## Docs update' with the exact bullet '- Status: UPDATED' or '- Status: EXEMPT'"
-          echo "$PR_BODY" | grep -Eq '^- Notes:[[:space:]]*[^[:space:]<]' \
-            || err "PR body needs '- Notes:' under '## Docs update' (list the docs touched, or why exempt)"
+          # Dependabot writes its own body (release notes) and a version bump changes no owning doc (L0-005 §2).
+          if [ "$PR_AUTHOR" = "dependabot[bot]" ]; then
+            echo "Dependabot PR: Docs update block not required"
+          else
+            echo "$PR_BODY" | grep -Eq '^- Status:[[:space:]]*`?(UPDATED|EXEMPT)`?[[:space:]]*$' \
+              || err "PR body needs '## Docs update' with the exact bullet '- Status: UPDATED' or '- Status: EXEMPT'"
+            echo "$PR_BODY" | grep -Eq '^- Notes:[[:space:]]*[^[:space:]<]' \
+              || err "PR body needs '- Notes:' under '## Docs update' (list the docs touched, or why exempt)"
+          fi
 @@/if@@
 @@#if rules.noAiAttribution@@
           if echo "$PR_BODY" | grep -qiE 'Generated with \[?Claude|claude\.ai/code|Co-Authored-By:.*(Claude|Anthropic)'; then

@@ -6,7 +6,7 @@
 | Document ID | L0-005-github-governance-standard-v1 |
 | Layer | L0 — Foundation Standards |
 | Status | Final |
-| Version | v1 |
+| Version | v2 |
 | Created | @@date@@ |
 | Last Updated | @@date@@ |
 | Owner | @@org.owner@@ |
@@ -32,7 +32,7 @@ Naming and the three-tier ID rule: L0-002 §4. Hotfixes branch from `develop`.
 ## 2 · Pull requests
 
 - Title is a Conventional Commit (`feat(auth): …`); a `develop` → `main` promotion starts with `@@rules.releasePrTitle@@:`.
-- Body uses `.github/pull_request_template.md`. `## Docs update` must contain `- Status: UPDATED|EXEMPT` and a real `- Notes:` line — CI (`PR Metadata`) parses it literally. Blank is not an answer.
+- Body uses `.github/pull_request_template.md`. `## Docs update` must contain `- Status: UPDATED|EXEMPT` and a real `- Notes:` line — CI (`PR Metadata`) parses it literally. Blank is not an answer. **Exception:** a PR opened by `dependabot[bot]` is exempt from the `## Docs update` rule — a version bump changes no owning document, and Dependabot writes its own body (release notes) that cannot carry the block. Its title and every other body rule still apply. A Dependabot PR that does need a doc change (a new language or runtime version, a stack change) is handled as a normal PR: a person adds the docs and the block.
 - One logical change per PR. A PR touching `.github/workflows/` is also reviewed for pipeline impact.
 - All required checks green: @@#each checks as c@@`@@c@@` @@/each@@.
 
@@ -64,4 +64,5 @@ Security/compliance findings and defect classes follow the remediation track: **
 
 | Version | Date | Author | Summary of changes |
 |---|---|---|---|
+| v2 | @@date@@ | @@org.name@@ | §2 — Dependabot PRs exempt from the `## Docs update` body rule (title and other body rules still apply) |
 | v1 | @@date@@ | @@org.name@@ | Initial release from soupler-governance-template v@@template.version@@ |

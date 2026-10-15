@@ -137,3 +137,19 @@ test('the generated logo script derives mono variants and a square favicon from 
   assert.match(fs.readFileSync(path.join(svgDir, 'example-org-logo-mark-mono-black.svg'), 'utf8'), /fill="#000000"/);
   assert.match(fs.readFileSync(path.join(svgDir, 'favicon.svg'), 'utf8'), /viewBox="0 0 100 100"/);
 });
+
+test('PR Metadata exempts Dependabot PRs from the Docs update block, and only them', () => {
+  // The run script of the generated `metadata` job, executed as CI would run it.
+  const wf = read('platform/.github/workflows/pr-governance.yml');
+  const block = wf.slice(wf.indexOf('name: Validate title and body'));
+  const run = block.slice(block.indexOf('run: |') + 'run: |'.length).split('\n').slice(1)
+    .map((l) => l.replace(/^ {10}/, '')).join('\n');
+  const check = (author, title, body) => sh('bash', ['-c', run], {
+    env: { ...process.env, PR_AUTHOR: author, PR_TITLE: title, PR_BODY: body, HEAD_REF: 'feat/x', BASE_REF: 'develop' },
+  });
+  const bump = 'Bumps a dependency from 1.0.0 to 1.0.1.';
+  assert.equal(check('dependabot[bot]', 'chore(deps): bump a dependency', bump).status, 0, 'Dependabot PR without the block should pass');
+  assert.equal(check('a-person', 'chore(deps): bump a dependency', bump).status, 1, 'a person still needs the block');
+  assert.equal(check('dependabot[bot]', 'bump a dependency', bump).status, 1, 'Dependabot titles are still checked');
+  assert.equal(check('a-person', 'feat(x): y', '## Docs update\n- Status: `EXEMPT`\n- Notes: comment-only change').status, 0);
+});

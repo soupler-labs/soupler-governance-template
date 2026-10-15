@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-10-15
+
+### Fixed
+- `PR Metadata` (`pr-governance.yml`, managed) no longer fails every Dependabot PR: the `## Docs update` block is not required when the PR author is `dependabot[bot]`, since Dependabot writes its own body (release notes) and a version bump changes no owning doc. The title rule and the no-AI-attribution rule still apply to every PR. L0-005 v2 §2 states the exception; `docs/usage.md` notes it under `rules.requireDocsUpdate`.
+
+### Changed
+- Generated workflows use current major versions of the GitHub actions: `actions/checkout` v7 and `actions/setup-node` v7 (`pr-governance.yml`, `secret-scan.yml`, `ci.yml`), `actions/github-script` v9 (`post-merge-issue-closure.yml`; its script uses only the injected `github` and `context`, so the v9 removal of `require('@actions/github')` does not affect it).
+
 ## [1.2.0] - 2026-10-05
 
 ### Changed
